@@ -14,6 +14,13 @@ const User = db.define('User', {
     email: {
         type: Sequelize.STRING(100)
     },
+    setor: {
+        type: Sequelize.INTEGER,
+        references: {
+            model: Department,
+            key: 'cod_setor'
+        }
+    },
     senha: {
         type: Sequelize.STRING(100)
     }
@@ -22,8 +29,8 @@ const User = db.define('User', {
     timestamps: false
 })
 
-User.belongsTo(Department, {
-    foreignKey: 'setor'
-})
+// User.belongsTo(Department, {
+//     foreignKey: 'setor'
+// })
 
 export default User;
