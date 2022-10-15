@@ -12,7 +12,7 @@ const Department = db.define('Department', {
         type: Sequelize.STRING(50)
     }
 }, {
-    tableName: 'setor',
+    tableName: 'setores',
     timestamps: false
 })
 

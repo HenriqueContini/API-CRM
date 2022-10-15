@@ -40,7 +40,7 @@ const Approval = db.define('Approval', {
         type: Sequelize.TEXT
     }
 }, {
-    tableName: 'aprovacao',
+    tableName: 'aprovacoes',
     timestamps: false
 })
 

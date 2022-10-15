@@ -74,7 +74,7 @@ const CRM = db.define('CRM', {
         type:Sequelize.TEXT
     },
 }, {
-    tableName: 'crm',
+    tableName: 'crms',
     timestamps: false
 })
 

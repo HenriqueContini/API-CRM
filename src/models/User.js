@@ -25,12 +25,8 @@ const User = db.define('User', {
         type: Sequelize.STRING(100)
     }
 }, {
-    tableName: 'usuario',
+    tableName: 'usuarios',
     timestamps: false
 })
-
-// User.belongsTo(Department, {
-//     foreignKey: 'setor'
-// })
 
 export default User;
