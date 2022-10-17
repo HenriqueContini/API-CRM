@@ -47,31 +47,37 @@ const CRM = db.define('CRM', {
         defaultValue: 'Pendente'
     },
     necessidade: {
-        type:Sequelize.TEXT
+        type: Sequelize.TEXT
     },
     impacto: {
-        type:Sequelize.TEXT
+        type: Sequelize.TEXT
     },
     descricao: {
-        type:Sequelize.TEXT
+        type: Sequelize.TEXT
+    },
+    objetivo: {
+        type: Sequelize.TEXT
     },
     justificativa: {
-        type:Sequelize.TEXT
+        type: Sequelize.TEXT
     },
-    alternativas: {
-        type:Sequelize.TEXT
+    alternativa: {
+        type: Sequelize.TEXT
     },
     sistemas_envolvidos: {
-        type:Sequelize.TEXT
-    },
-    complexidade: {
-        type:Sequelize.STRING(20)
-    },
-    impacto_mudanca: {
-        type:Sequelize.TEXT
+        type: Sequelize.TEXT
     },
     comportamento_offline: {
-        type:Sequelize.TEXT
+        type: Sequelize.TEXT
+    },
+    dependencia: {
+        type: Sequelize.TEXT
+    },
+    complexidade: {
+        type: Sequelize.STRING(20)
+    },
+    impacto_mudanca: {
+        type: Sequelize.TEXT
     },
 }, {
     tableName: 'crms',
