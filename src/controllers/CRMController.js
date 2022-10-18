@@ -1,26 +1,22 @@
+import CheckVariables from '../common/CheckVariables.js';
 import User from '../models/User.js';
 import CRM from '../models/CRM.js';
 
 export default class CRMController {
     static async createCRM(req, res) {
         try {
-
             const user = await User.findByPk(req.body.user);
 
-            if (user === null) {
+            if (CheckVariables.isNullOrUndefined(user)) {
                 res.status(404).json({error: true, msg: 'Usuário não encontrado!'});
                 return;
             }
 
             let lastCRM = await CRM.max('numero_crm');
 
-            console.log(lastCRM);
-
-            if (lastCRM === null) {
+            if (CheckVariables.isNullOrUndefined(lastCRM)) {
                 lastCRM = 0;
             }
-
-            console.log(lastCRM + 1);
 
             await CRM.create({
                 numero_crm: lastCRM + 1,
@@ -40,7 +36,6 @@ export default class CRMController {
 
             res.status(200).send("Criado com sucesso!");
         } catch(e) {
-            console.log(e)
             res.status(500).json({error: true, msg: 'Erro ao criar uma CRM!'});
         }
     }
