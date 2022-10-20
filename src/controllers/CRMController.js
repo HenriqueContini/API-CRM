@@ -65,4 +65,8 @@ export default class CRMController {
             res.status(500).json({error: true, msg: 'Erro ao buscar pelas CRMs!'});
         }
     }
+
+    // static async awareCRMs(req, res) {
+
+    // }
 }
