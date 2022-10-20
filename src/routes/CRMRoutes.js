@@ -5,6 +5,6 @@ const router = express.Router();
 
 router
     .post('/crm/create-crm', CRMController.createCRM)
-    .get('/crm/usercrm/:user', CRMController.usercrm)
+    .get('/crm/usercrms/:user', CRMController.userCRMs)
 
 export default router;

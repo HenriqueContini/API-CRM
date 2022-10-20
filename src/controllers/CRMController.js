@@ -41,13 +41,10 @@ export default class CRMController {
         }
     }
 
-    static async usercrm(req, res) {
+    static async userCRMs(req, res) {
         // select id, numero_crm, max(versao), requerente, descricao, data_criacao from crms where requerente = '00002' group by numero_crm;
-
         try {
             const user = await User.findByPk(req.params.user);
-
-            console.log(user)
 
             if (CheckVariables.isNullOrUndefined(user)) {
                 res.status(404).json({error: true, msg: 'Usuário não encontrado!'});
@@ -55,7 +52,7 @@ export default class CRMController {
             }
 
             const crms = await CRM.findAll({
-                attributes: ['id', 'numero_crm', [db.fn('MAX', db.col('versao')), 'ultima_versao'], 'requerente', 'descricao', 'data_criacao'],
+                attributes: ['id', 'numero_crm', [db.fn('MAX', db.col('versao')), 'ultima_versao'], 'nome_crm', 'requerente', 'descricao', 'data_criacao'],
                 where: {
                     requerente: user.matricula
                 },
