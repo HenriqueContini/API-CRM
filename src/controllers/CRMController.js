@@ -2,6 +2,7 @@ import CheckVariables from '../common/CheckVariables.js';
 import db from '../config/dbconfig.js';
 import User from '../models/User.js';
 import CRM from '../models/CRM.js';
+import Approval from '../models/Approval.js';
 
 export default class CRMController {
     static async createCRM(req, res) {
@@ -9,7 +10,7 @@ export default class CRMController {
             const user = await User.findByPk(req.body.user);
 
             if (CheckVariables.isNullOrUndefined(user)) {
-                res.status(404).json({error: true, msg: 'Usuário não encontrado!'});
+                res.status(404).json({ error: true, msg: 'Usuário não encontrado!' });
                 return;
             }
 
@@ -35,9 +36,30 @@ export default class CRMController {
                 dependencia: req.body.dependencia
             })
 
-            res.status(200).json({error: false, msg: "Criado com sucesso!"});
-        } catch(e) {
-            res.status(500).json({error: true, msg: 'Erro ao criar uma CRM!'});
+            const lastId = await CRM.max('id', {
+                where: {
+                    requerente: user.matricula
+                }
+            })
+
+            await Approval.create({
+                crm_id: lastId,
+                setor: 1
+            })
+
+            let crm_departments = JSON.parse(req.body.setores);
+
+            crm_departments.forEach(async (setor) => {
+                await Approval.create({
+                    crm_id: lastId,
+                    setor: setor
+                })
+            })
+
+            res.status(200).json({ error: false, msg: "Criado com sucesso!" });
+        } catch (e) {
+            console.log(e)
+            res.status(500).json({ error: true, msg: 'Erro ao criar uma CRM!' });
         }
     }
 
@@ -47,10 +69,11 @@ export default class CRMController {
             const user = await User.findByPk(req.params.user);
 
             if (CheckVariables.isNullOrUndefined(user)) {
-                res.status(404).json({error: true, msg: 'Usuário não encontrado!'});
+                res.status(404).json({ error: true, msg: 'Usuário não encontrado!' });
                 return;
             }
 
+            // ERRO: o método não está voltando os dados da última versão
             const crms = await CRM.findAll({
                 attributes: ['id', 'numero_crm', [db.fn('MAX', db.col('versao')), 'ultima_versao'], 'nome_crm', 'requerente', 'descricao', 'data_criacao'],
                 where: {
@@ -62,7 +85,7 @@ export default class CRMController {
             res.status(200).send(crms);
         } catch (e) {
             console.log(e);
-            res.status(500).json({error: true, msg: 'Erro ao buscar pelas CRMs!'});
+            res.status(500).json({ error: true, msg: 'Erro ao buscar pelas CRMs!' });
         }
     }
 
