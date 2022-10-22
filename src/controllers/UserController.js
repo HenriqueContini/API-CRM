@@ -24,7 +24,7 @@ export default class UserController {
             }
 
             if (user.senha === senha) {
-                res.status(200).json(user.matricula);
+                res.status(200).json({matricula: user.matricula, setor: user.setor});
             } else {
                 res.status(500).json({error: true, msg: 'Senha incorreta'});
             }
