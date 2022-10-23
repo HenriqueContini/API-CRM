@@ -65,7 +65,6 @@ export default class CRMController {
     }
 
     static async userCRMs(req, res) {
-        // select id, numero_crm, max(versao), requerente, descricao, data_criacao from crms where requerente = '00002' group by numero_crm;
         try {
             const user = await User.findByPk(req.params.user);
 
@@ -73,15 +72,6 @@ export default class CRMController {
                 res.status(404).json({ error: true, msg: 'Usuário não encontrado!' });
                 return;
             }
-
-            // ERRO: o método não está voltando os dados da última versão
-            // const crms = await CRM.findAll({
-            //     attributes: ['id', 'numero_crm', [db.fn('MAX', db.col('versao')), 'ultima_versao'], 'nome_crm', 'requerente', 'descricao', 'data_criacao'],
-            //     where: {
-            //         requerente: user.matricula
-            //     },
-            //     group: 'numero_crm'
-            // });
 
             const crms = await db.query(`SELECT cr.id, cr.numero_crm, cr.versao, u.nome as usuario, cr.nome_crm FROM crms cr 
                 INNER JOIN usuarios u on u.matricula = cr.requerente WHERE (numero_crm, versao) IN 
