@@ -1,3 +1,4 @@
+import { QueryTypes } from 'sequelize';
 import CheckVariables from '../common/CheckVariables.js';
 import db from '../config/dbconfig.js';
 import User from '../models/User.js';
@@ -49,10 +50,10 @@ export default class CRMController {
 
             let crm_departments = JSON.parse(req.body.setores);
 
-            crm_departments.forEach(async (setor) => {
+            crm_departments.forEach(async (department) => {
                 await Approval.create({
                     crm_id: lastId,
-                    setor: setor
+                    setor: department
                 })
             })
 
@@ -74,13 +75,21 @@ export default class CRMController {
             }
 
             // ERRO: o método não está voltando os dados da última versão
-            const crms = await CRM.findAll({
-                attributes: ['id', 'numero_crm', [db.fn('MAX', db.col('versao')), 'ultima_versao'], 'nome_crm', 'requerente', 'descricao', 'data_criacao'],
-                where: {
-                    requerente: user.matricula
-                },
-                group: 'numero_crm'
-            });
+            // const crms = await CRM.findAll({
+            //     attributes: ['id', 'numero_crm', [db.fn('MAX', db.col('versao')), 'ultima_versao'], 'nome_crm', 'requerente', 'descricao', 'data_criacao'],
+            //     where: {
+            //         requerente: user.matricula
+            //     },
+            //     group: 'numero_crm'
+            // });
+
+            const crms = await db.query(`SELECT cr.id, cr.numero_crm, cr.versao, u.nome as usuario, cr.nome_crm FROM crms cr 
+                INNER JOIN usuarios u on u.matricula = cr.requerente WHERE (numero_crm, versao) IN 
+                (SELECT numero_crm, MAX(versao) FROM crms where requerente = :user GROUP BY numero_crm);`, {
+                    model: CRM,
+                    replacements: {user: user.matricula},
+                    type: QueryTypes.SELECT
+                })
 
             res.status(200).send(crms);
         } catch (e) {
