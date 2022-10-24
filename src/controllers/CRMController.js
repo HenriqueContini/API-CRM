@@ -59,7 +59,7 @@ export default class CRMController {
                 })
             }
 
-            res.status(200).json({ error: false, msg: "Criado com sucesso!" });
+            res.status(201).json({ error: false, msg: "Criado com sucesso!" });
         } catch (e) {
             console.log(e)
             res.status(500).json({ error: true, msg: 'Erro ao criar uma CRM!' });
