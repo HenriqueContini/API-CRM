@@ -47,15 +47,17 @@ export default class CRMController {
                 crm_id: lastId,
                 setor: 1
             })
+            
+            if (req.body.setores !== undefined) {
+                let crm_departments = JSON.parse(req.body.setores);
 
-            let crm_departments = JSON.parse(req.body.setores);
-
-            crm_departments.forEach(async (department) => {
-                await Approval.create({
-                    crm_id: lastId,
-                    setor: department
+                crm_departments.forEach(async (department) => {
+                    await Approval.create({
+                        crm_id: lastId,
+                        setor: department
+                    })
                 })
-            })
+            }
 
             res.status(200).json({ error: false, msg: "Criado com sucesso!" });
         } catch (e) {
