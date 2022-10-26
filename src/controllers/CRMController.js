@@ -105,9 +105,12 @@ export default class CRMController {
                 inner join aprovacoes ap on cr.id = ap.crm_id
                 inner join usuarios u on cr.requerente = u.matricula
                 WHERE (cr.numero_crm, cr.versao) IN (SELECT numero_crm, MAX(versao) FROM crms GROUP BY numero_crm) 
-                and ap.setor = :user_department;`, {
+                and ap.setor = :user_department and cr.requerente != :user;`, {
                     model: CRM,
-                    replacements: {user_department: user.setor},
+                    replacements: {
+                        user: user.matricula,
+                        user_department: user.setor
+                    },
                     type: QueryTypes.SELECT
                 })
 
