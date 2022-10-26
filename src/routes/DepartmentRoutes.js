@@ -4,6 +4,6 @@ import DepartmentController from "../controllers/DepartmentController.js";
 const router = express.Router();
 
 router
-    .get('/Department/listDeparments', DepartmentController.listDepartments)
+    .get('/department/list-departments/:userdepartment', DepartmentController.listDepartments)
 
 export default router;
