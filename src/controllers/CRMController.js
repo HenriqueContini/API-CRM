@@ -47,7 +47,7 @@ export default class CRMController {
                 crm_id: lastId,
                 setor: 1
             })
-            
+
             if (req.body.setores !== undefined) {
                 let crm_departments = JSON.parse(req.body.setores);
 
@@ -79,10 +79,10 @@ export default class CRMController {
                 cr.descricao, DATE_FORMAT(cr.data_criacao, "%m %d %Y") as data_criacao FROM crms cr 
                 INNER JOIN usuarios u on u.matricula = cr.requerente WHERE (numero_crm, versao) IN 
                 (SELECT numero_crm, MAX(versao) FROM crms WHERE requerente = :user GROUP BY numero_crm);`, {
-                    model: CRM,
-                    replacements: {user: user.matricula},
-                    type: QueryTypes.SELECT
-                })
+                model: CRM,
+                replacements: { user: user.matricula },
+                type: QueryTypes.SELECT
+            })
 
             res.status(200).send(crms);
         } catch (e) {
@@ -91,7 +91,30 @@ export default class CRMController {
         }
     }
 
-    // static async awareCRMs(req, res) {
+    static async awareCRMs(req, res) {
+        try {
+            const user = await User.findByPk(req.params.user);
 
-    // }
+            if (CheckVariables.isNullOrUndefined(user)) {
+                res.status(404).json({ error: true, msg: 'Usuário não encontrado!' });
+                return;
+            }
+
+            const crms = await db.query(`select cr.id, cr.numero_crm, cr.versao, u.nome as requerente, cr.nome_crm, 
+                cr.descricao, DATE_FORMAT(cr.data_criacao, "%m %d %Y") as data_criacao from crms cr
+                inner join aprovacoes ap on cr.id = ap.crm_id
+                inner join usuarios u on cr.requerente = u.matricula
+                WHERE (cr.numero_crm, cr.versao) IN (SELECT numero_crm, MAX(versao) FROM crms GROUP BY numero_crm) 
+                and ap.setor = :user_department;`, {
+                    model: CRM,
+                    replacements: {user_department: user.setor},
+                    type: QueryTypes.SELECT
+                })
+
+                res.status(200).send(crms);
+        } catch (e) {
+            console.log(e);
+            res.status(500).json({ error: true, msg: 'Erro ao buscar pelas CRMs!' });
+        }
+    }
 }
