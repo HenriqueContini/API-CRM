@@ -3,67 +3,25 @@ import CheckVariables from '../common/CheckVariables.js';
 import db from '../config/dbconfig.js';
 import User from '../models/User.js';
 import CRM from '../models/CRM.js';
-import Approval from '../models/Approval.js';
+import CRMService from '../services/CRMService.js';
+import UserService from '../services/UserService.js';
 
 export default class CRMController {
     static async createCRM(req, res) {
-        try {
-            const user = await User.findByPk(req.body.user);
 
-            if (CheckVariables.isNullOrUndefined(user)) {
-                res.status(404).json({ error: true, msg: 'Usuário não encontrado!' });
-                return;
-            }
+        const user = await UserService.checkUser(req.body.user);
 
-            let lastCRM = await CRM.max('numero_crm');
-
-            if (CheckVariables.isNullOrUndefined(lastCRM)) {
-                lastCRM = 0;
-            }
-
-            await CRM.create({
-                numero_crm: lastCRM + 1,
-                requerente: user.matricula,
-                setor: user.setor,
-                nome_crm: req.body.nome_crm,
-                necessidade: req.body.necessidade,
-                impacto: req.body.impacto,
-                descricao: req.body.descricao,
-                objetivo: req.body.objetivo,
-                justificativa: req.body.justificativa,
-                alternativa: req.body.alternativa,
-                sistemas_envolvidos: req.body.sistemas,
-                comportamento_offline: req.body.offline,
-                dependencia: req.body.dependencia
-            })
-
-            const lastId = await CRM.max('id', {
-                where: {
-                    requerente: user.matricula
-                }
-            })
-
-            await Approval.create({
-                crm_id: lastId,
-                setor: 1
-            })
-
-            if (req.body.setores !== undefined) {
-                let crm_departments = JSON.parse(req.body.setores);
-
-                crm_departments.forEach(async (department) => {
-                    await Approval.create({
-                        crm_id: lastId,
-                        setor: department
-                    })
-                })
-            }
-
-            res.status(201).json({ error: false, msg: "Criado com sucesso!" });
-        } catch (e) {
-            console.log(e)
-            res.status(500).json({ error: true, msg: 'Erro ao criar uma CRM!' });
+        if (user.error === true) {
+            return res.status(404).json({ error: true, msg: 'Usuário não encontrado!' });
         }
+
+        const newCRM = await CRMService.createCRM(user, req.body);
+
+        if (newCRM.error === true) {
+            return res.status(500).json({ error: true, msg: newCRM.msg });
+        }
+
+        return res.status(201).json({ error: false, msg: "Criado com sucesso!" });
     }
 
     static async userCRMs(req, res) {

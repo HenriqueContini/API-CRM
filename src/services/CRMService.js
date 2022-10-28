@@ -1,0 +1,60 @@
+import { QueryTypes } from 'sequelize';
+import db from '../config/dbconfig.js';
+import User from '../models/User.js';
+import CRM from '../models/CRM.js';
+import Approval from '../models/Approval.js';
+
+export default class CRMService {
+    static async createCRM(user, data) {
+        try {
+            const lastCRM = await CRM.max('numero_crm');
+
+            if (lastCRM === null || lastCRM === undefined) {
+                lastCRM = 0;
+            }
+
+            await CRM.create({
+                numero_crm: lastCRM + 1,
+                requerente: user.matricula,
+                setor: user.setor,
+                nome_crm: data.nome_crm,
+                necessidade: data.necessidade,
+                impacto: data.impacto,
+                descricao: data.descricao,
+                objetivo: data.objetivo,
+                justificativa: data.justificativa,
+                alternativa: data.alternativa,
+                sistemas_envolvidos: data.sistemas,
+                comportamento_offline: data.offline,
+                dependencia: data.dependencia
+            })
+
+            const CRMCreated = await CRM.max('id', {
+                where: {
+                    requerente: user.matricula
+                }
+            })
+
+            await Approval.create({
+                crm_id: CRMCreated,
+                setor: 1
+            })
+
+            if (data.setores !== undefined) {
+                let crm_departments = JSON.parse(data.setores);
+
+                crm_departments.forEach(async (department) => {
+                    await Approval.create({
+                        crm_id: CRMCreated,
+                        setor: department
+                    })
+                })
+            }
+
+            return { error: false, msg: "Criado com sucesso!" };
+        } catch (e) {
+            console.log(e)
+            return { error: true, msg: "Erro ao criar uma CRM!" };
+        }
+    }
+}
