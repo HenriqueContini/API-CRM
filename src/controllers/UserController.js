@@ -1,35 +1,23 @@
-import CheckVariables from '../common/CheckVariables.js';
-import User from '../models/User.js';
+import UserService from "../services/UserService.js";
 
 export default class UserController {
     static async login(req, res) {
         const {matricula, senha} = req.body;
 
-        if (CheckVariables.isNullOrUndefined(matricula)) {
-            res.status(500).json({error: true, msg: 'Houve um problema com a matrícula'});
-            return;
+        if (matricula === null || matricula === undefined) {
+            res.status(401).json({error: true, msg: 'Houve um problema com a matrícula'});
         }
 
-        if (CheckVariables.isNullOrUndefined(senha)) {
-            res.status(500).json({error: true, msg: 'Houve um problema com a senha'});
-            return;
+        if (senha === null || senha === undefined) {
+            res.status(401).json({error: true, msg: 'Houve um problema com a matrícula'});
         }
 
-        try {
-            const user = await User.findByPk(matricula);
+        const loginResult = await UserService.login(matricula, senha);
 
-            if (CheckVariables.isNullOrUndefined(user)) {
-                res.status(404).json({error: true, msg: 'Usuário não encontrado!'});
-                return;
-            }
-
-            if (user.senha === senha) {
-                res.status(200).json({matricula: user.matricula, setor: user.setor});
-            } else {
-                res.status(500).json({error: true, msg: 'Senha incorreta'});
-            }
-        } catch (e) {
-            res.status(404).json({error: true, msg: e.message});
+        if (loginResult.error === true) {
+            return res.status(400).json(loginResult);
         }
+
+        return res.status(200).json(loginResult);
     }
 }
