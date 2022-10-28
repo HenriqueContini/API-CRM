@@ -1,21 +1,19 @@
-import Department from "../models/Department.js";
-import { Op } from "sequelize";
+import DepartmentService from "../services/DepartmentService.js";
 
 export default class DepartmentController {
-    static async listDepartments(req, res) {
-        try {
-            const departments = await Department.findAll({
-                where: {
-                    cod_setor: {
-                        [Op.notIn]: [1, req.params.userdepartment]
-                    }
-                }
-            });
+    static async getDepartments(req, res) {
+        const userDepartment = Number(req.params.userdepartment);
 
-            res.status(200).json(departments);
-        } catch (error) {
-            console.log(error)
-            res.status(500).json({ error: true, msg: 'Erro ao buscar os setores!' });
+        if (isNaN(userDepartment)) {
+            return res.status(500).json({error: true, msg: "Houve um erro ao fazer a requisição"});
         }
+
+        const departments = await DepartmentService.listDepartments(userDepartment);
+
+        if (departments.error === true) {
+            return res.status(500).json(departments);
+        }
+
+        return res.status(200).json(departments);
     }
 }
