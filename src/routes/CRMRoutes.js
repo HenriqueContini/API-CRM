@@ -6,6 +6,6 @@ const router = express.Router();
 router
     .post('/crm/create-crm', CRMController.createCRM)
     .get('/crm/usercrms/:user', CRMController.getUserCRMs)
-    .get('/crm/awarecrms/:user', CRMController.awareCRMs)
+    .get('/crm/awarecrms/:user', CRMController.getAwareCRMs)
 
 export default router;

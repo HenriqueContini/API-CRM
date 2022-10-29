@@ -39,33 +39,19 @@ export default class CRMController {
         return res.status(200).send(userCRMs);
     }
 
-    static async awareCRMs(req, res) {
-        try {
-            const user = await User.findByPk(req.params.user);
+    static async getAwareCRMs(req, res) {
+        const user = await UserService.checkUser(req.params.user);
 
-            if (CheckVariables.isNullOrUndefined(user)) {
-                res.status(404).json({ error: true, msg: 'Usuário não encontrado!' });
-                return;
-            }
-
-            const crms = await db.query(`select cr.id, cr.numero_crm, cr.versao, u.nome as requerente, cr.nome_crm, 
-                cr.descricao, DATE_FORMAT(cr.data_criacao, "%m %d %Y") as data_criacao from crms cr
-                inner join aprovacoes ap on cr.id = ap.crm_id
-                inner join usuarios u on cr.requerente = u.matricula
-                WHERE (cr.numero_crm, cr.versao) IN (SELECT numero_crm, MAX(versao) FROM crms GROUP BY numero_crm) 
-                and ap.setor = :user_department and cr.requerente != :user;`, {
-                model: CRM,
-                replacements: {
-                    user: user.matricula,
-                    user_department: user.setor
-                },
-                type: QueryTypes.SELECT
-            })
-
-            res.status(200).send(crms);
-        } catch (e) {
-            console.log(e);
-            res.status(500).json({ error: true, msg: 'Erro ao buscar pelas CRMs!' });
+        if (user.error === true) {
+            return res.status(404).json(user);
         }
+
+        const crms = await CRMService.getAwareCRMs(user);
+
+        if (crms.error === true) {
+            return res.status(500).json(crms);
+        }
+
+        return res.status(200).send(crms);
     }
 }

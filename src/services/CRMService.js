@@ -75,4 +75,27 @@ export default class CRMService {
             return { error: true, msg: 'Erro ao buscar pelas CRMs!' };
         }
     }
+
+    static async getAwareCRMs(user) {
+        try {
+            const crms = await db.query(`select cr.id, cr.numero_crm, cr.versao, u.nome as requerente, cr.nome_crm, 
+                cr.descricao, DATE_FORMAT(cr.data_criacao, "%m %d %Y") as data_criacao from crms cr
+                inner join aprovacoes ap on cr.id = ap.crm_id
+                inner join usuarios u on cr.requerente = u.matricula
+                WHERE (cr.numero_crm, cr.versao) IN (SELECT numero_crm, MAX(versao) FROM crms GROUP BY numero_crm) 
+                and ap.setor = :user_department and cr.requerente != :user;`, {
+                model: CRM,
+                replacements: {
+                    user: user.matricula,
+                    user_department: user.setor
+                },
+                type: QueryTypes.SELECT
+            })
+
+            return crms;
+        } catch (e) {
+            console.log(e);
+            return { error: true, msg: 'Erro ao buscar pelas CRMs!' }
+        }
+    }
 }
