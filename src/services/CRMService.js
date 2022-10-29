@@ -57,4 +57,22 @@ export default class CRMService {
             return { error: true, msg: "Erro ao criar uma CRM!" };
         }
     }
+
+    static async getUserCRMs(user) {
+        try {
+            const crms = await db.query(`SELECT cr.id, cr.numero_crm, cr.versao, u.nome as requerente, cr.nome_crm, 
+                cr.descricao, DATE_FORMAT(cr.data_criacao, "%m %d %Y") as data_criacao FROM crms cr 
+                INNER JOIN usuarios u on u.matricula = cr.requerente WHERE (numero_crm, versao) IN 
+                (SELECT numero_crm, MAX(versao) FROM crms WHERE requerente = :user GROUP BY numero_crm);`, {
+                model: CRM,
+                replacements: { user: user.matricula },
+                type: QueryTypes.SELECT
+            })
+
+            return crms;
+        } catch (e) {
+            console.log(e);
+            return { error: true, msg: 'Erro ao buscar pelas CRMs!' };
+        }
+    }
 }
