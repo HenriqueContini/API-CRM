@@ -6,7 +6,9 @@ import Approval from '../models/Approval.js';
 export default class CRMService {
     static async createCRM(user, data) {
         try {
-            const lastCRM = await CRM.max('numero_crm');
+            let lastCRM = await CRM.max('numero_crm');
+
+            console.log(lastCRM)
 
             if (lastCRM === null || lastCRM === undefined) {
                 lastCRM = 0;
@@ -91,7 +93,7 @@ export default class CRMService {
                     user_department: user.setor
                 },
                 type: QueryTypes.SELECT
-            })
+            });
 
             return crms;
         } catch (e) {
@@ -102,8 +104,18 @@ export default class CRMService {
 
     static async getCRM(id) {
         try {
-            const crm = await CRM.findByPk(id);
-    
+            const crm = await db.query(`select cr.id, cr.numero_crm, cr.versao, u.nome as requerente, s.nome as setor, 
+                cr.nome_crm, DATE_FORMAT(cr.data_criacao, "%m %d %Y") as data_criacao, cr.status_crm, cr.necessidade, cr.impacto, 
+                cr.descricao, cr.objetivo, cr.justificativa, cr.alternativa, cr.sistemas_envolvidos, cr.comportamento_offline, 
+                cr.dependencia, cr.complexidade, cr.impacto_mudanca from crms cr 
+                inner join usuarios u on cr.requerente = u.matricula inner join setores s on cr.setor = s.cod_setor where cr.id = :id;`, {
+                model: CRM,
+                replacements: {
+                    id: id
+                },
+                type: QueryTypes.SELECT
+            });
+
             if (crm === null) {
                 return { error: true, msg: 'CRM não encontrada!' };
             }
@@ -114,7 +126,7 @@ export default class CRMService {
                 }
             })
 
-            return {crm: crm, setores: crmDepartments};
+            return { crm: crm, setores: crmDepartments };
         } catch (e) {
             console.log(e);
             return { error: true, msg: 'Houve um problema ao buscar pela CRM' }

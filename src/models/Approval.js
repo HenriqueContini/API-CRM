@@ -11,27 +11,6 @@ const Approval = db.define('Approval', {
         primaryKey: true,
         autoIncrement: true
     },
-    crm_id: {
-        type: Sequelize.INTEGER,
-        references: {
-            model: CRM,
-            key: 'id'
-        }
-    },
-    setor: {
-        type: Sequelize.INTEGER,
-        references: {
-            model: Department,
-            key: 'cod_setor'
-        }
-    },
-    responsavel: {
-        type: Sequelize.STRING(10),
-        references: {
-            model: User,
-            key: 'matricula'
-        }
-    },
     decisao: {
         type: Sequelize.STRING(20),
         defaultValue: 'Pendente'
@@ -42,6 +21,18 @@ const Approval = db.define('Approval', {
 }, {
     tableName: 'aprovacoes',
     timestamps: false
+})
+
+Approval.belongsTo(CRM, {
+    foreignKey: 'crm_id'
+})
+
+Approval.belongsTo(Department, {
+    foreignKey: 'setor'
+})
+
+Approval.belongsTo(User, {
+    foreignKey: 'responsavel'
 })
 
 export default Approval;

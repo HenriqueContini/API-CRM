@@ -19,20 +19,6 @@ const CRM = db.define('CRM', {
         allowNull: false,
         defaultValue: 1
     },
-    requerente: {
-        type: Sequelize.STRING(10),
-        references: {
-            model: User,
-            key: 'matricula'
-        }
-    },
-    setor: {
-        type: Sequelize.INTEGER,
-        references: {
-            model: Department,
-            key: 'cod_setor'
-        }
-    },
     nome_crm: {
         type: Sequelize.STRING(150),
         allowNull: false,
@@ -82,6 +68,14 @@ const CRM = db.define('CRM', {
 }, {
     tableName: 'crms',
     timestamps: false
+})
+
+CRM.belongsTo(User, {
+    foreignKey: 'requerente'
+})
+
+CRM.belongsTo(Department, {
+    foreignKey: 'setor'
 })
 
 export default CRM;
