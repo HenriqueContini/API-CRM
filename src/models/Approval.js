@@ -34,7 +34,7 @@ const Approval = db.define('Approval', {
     },
     decisao: {
         type: Sequelize.STRING(20),
-        default: 'Pendente'
+        defaultValue: 'Pendente'
     },
     comentario: {
         type: Sequelize.TEXT

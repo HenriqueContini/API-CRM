@@ -1,6 +1,5 @@
 import { QueryTypes } from 'sequelize';
 import db from '../config/dbconfig.js';
-import User from '../models/User.js';
 import CRM from '../models/CRM.js';
 import Approval from '../models/Approval.js';
 
@@ -37,7 +36,8 @@ export default class CRMService {
 
             await Approval.create({
                 crm_id: CRMCreated,
-                setor: 1
+                setor: 1,
+                decisao: 'Pendente'
             })
 
             if (data.setores !== undefined) {
@@ -46,7 +46,8 @@ export default class CRMService {
                 crm_departments.forEach(async (department) => {
                     await Approval.create({
                         crm_id: CRMCreated,
-                        setor: department
+                        setor: department,
+                        decisao: 'Pendente'
                     })
                 })
             }
@@ -95,7 +96,28 @@ export default class CRMService {
             return crms;
         } catch (e) {
             console.log(e);
-            return { error: true, msg: 'Erro ao buscar pelas CRMs!' }
+            return { error: true, msg: 'Erro ao buscar pelas CRMs!' };
+        }
+    }
+
+    static async getCRM(id) {
+        try {
+            const crm = await CRM.findByPk(id);
+    
+            if (crm === null) {
+                return { error: true, msg: 'CRM não encontrada!' };
+            }
+
+            const crmDepartments = await Approval.findAll({
+                where: {
+                    crm_id: id
+                }
+            })
+
+            return {crm: crm, setores: crmDepartments};
+        } catch (e) {
+            console.log(e);
+            return { error: true, msg: 'Houve um problema ao buscar pela CRM' }
         }
     }
 }

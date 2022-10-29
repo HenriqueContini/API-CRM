@@ -1,8 +1,3 @@
-import { QueryTypes } from 'sequelize';
-import CheckVariables from '../common/CheckVariables.js';
-import db from '../config/dbconfig.js';
-import User from '../models/User.js';
-import CRM from '../models/CRM.js';
 import CRMService from '../services/CRMService.js';
 import UserService from '../services/UserService.js';
 
@@ -53,5 +48,15 @@ export default class CRMController {
         }
 
         return res.status(200).send(crms);
+    }
+
+    static async getCRM(req, res) {
+        const crm = await CRMService.getCRM(req.params.id);
+
+        if (crm.error === true) {
+            return res.status(500).json(crm);
+        }
+
+        return res.status(200).send(crm);
     }
 }
