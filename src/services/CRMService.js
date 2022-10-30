@@ -2,6 +2,7 @@ import { QueryTypes } from 'sequelize';
 import db from '../config/dbconfig.js';
 import CRM from '../models/CRM.js';
 import Approval from '../models/Approval.js';
+import Department from '../models/Department.js';
 
 export default class CRMService {
     static async createCRM(user, data) {
@@ -120,13 +121,16 @@ export default class CRMService {
                 return { error: true, msg: 'CRM não encontrada!' };
             }
 
-            const crmDepartments = await Approval.findAll({
-                where: {
-                    crm_id: id
-                }
+            const crmDepartments = await db.query(`select a.id_aprovacao, a.decisao, a.comentario, a.crm_id, a.responsavel, s.nome as setor from aprovacoes a
+                inner join setores s on a.setor = s.cod_setor where a.crm_id = :id;`, {
+                model: Approval,
+                replacements: {
+                    id: id
+                },
+                type: QueryTypes.SELECT
             })
 
-            return { crm: crm, setores: crmDepartments };
+            return { crm: crm[0], setores: crmDepartments };
         } catch (e) {
             console.log(e);
             return { error: true, msg: 'Houve um problema ao buscar pela CRM' }
