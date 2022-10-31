@@ -20,4 +20,14 @@ export default class UserController {
 
         return res.status(200).json(loginResult);
     }
+
+    static async getUser(req, res) {
+        const user = await UserService.getUser(req.params.user);
+
+        if (user.error === true) {
+            return res.status(400).json(user);
+        }
+
+        return res.status(200).json(user)
+    }
 }

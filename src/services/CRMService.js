@@ -118,7 +118,7 @@ export default class CRMService {
                 return { error: true, msg: 'CRM não encontrada!' };
             }
 
-            const crmDepartments = await db.query(`select a.id_aprovacao, a.decisao, a.comentario, a.crm_id, a.responsavel, s.nome as setor from aprovacoes a
+            const crmDepartments = await db.query(`select a.id_aprovacao, a.decisao, a.comentario, a.crm_id, a.responsavel, s.cod_setor, s.nome as setor from aprovacoes a
                 inner join setores s on a.setor = s.cod_setor where a.crm_id = :id;`, {
                 model: Approval,
                 replacements: {
