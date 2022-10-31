@@ -9,8 +9,16 @@ export default class ApprovalController {
             return res.status(404).json(user);
         }
 
-        const decision = await ApprovalService.putDecision(user, req.params.crm, req.body.aprovado, 
-            req.body.comentario
-        );
+        if (req.body.aprovado === null || req.body.aprovado === undefined) {
+            return res.status(400).json({error: true, msg: "É necessário a aprovação ou rejeição para realizar a operação!"})
+        }
+
+        const decision = await ApprovalService.putDecision(user, req.params.crm, req.body.aprovado, req.body.comentario);
+
+        if (decision.error === true) {
+            return res.status(500).json(decision);
+        }
+
+        return res.status(201).json(decision);
     }
 }
