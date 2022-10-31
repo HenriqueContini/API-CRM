@@ -2,6 +2,7 @@ import express from 'express';
 import UserRoutes from './UserRoutes.js';
 import CRMRoutes from './CRMRoutes.js';
 import DepartmentRoutes from './DepartmentRoutes.js';
+import ApprovalRoutes from './ApprovalRoutes.js'
 import cors from 'cors';
 
 const routes = (app) => {
@@ -11,7 +12,8 @@ const routes = (app) => {
         cors(),
         UserRoutes,
         CRMRoutes,
-        DepartmentRoutes
+        DepartmentRoutes,
+        ApprovalRoutes
     );
 
     app.get('/', (req, res) => {

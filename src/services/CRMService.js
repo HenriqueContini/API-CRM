@@ -2,14 +2,11 @@ import { QueryTypes } from 'sequelize';
 import db from '../config/dbconfig.js';
 import CRM from '../models/CRM.js';
 import Approval from '../models/Approval.js';
-import Department from '../models/Department.js';
 
 export default class CRMService {
     static async createCRM(user, data) {
         try {
             let lastCRM = await CRM.max('numero_crm');
-
-            console.log(lastCRM)
 
             if (lastCRM === null || lastCRM === undefined) {
                 lastCRM = 0;
@@ -105,7 +102,7 @@ export default class CRMService {
 
     static async getCRM(id) {
         try {
-            const crm = await db.query(`select cr.id, cr.numero_crm, cr.versao, u.nome as requerente, s.nome as setor, 
+            const crm = await db.query(`select cr.id, cr.numero_crm, cr.versao, u.nome as requerente, cr.requerente as requerente_matricula, u.email as email, s.nome as setor, 
                 cr.nome_crm, DATE_FORMAT(cr.data_criacao, "%m %d %Y") as data_criacao, cr.status_crm, cr.necessidade, cr.impacto, 
                 cr.descricao, cr.objetivo, cr.justificativa, cr.alternativa, cr.sistemas_envolvidos, cr.comportamento_offline, 
                 cr.dependencia, cr.complexidade, cr.impacto_mudanca from crms cr 
