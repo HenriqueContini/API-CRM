@@ -8,5 +8,6 @@ router
     .get('/crm/usercrms/:user', CRMController.getUserCRMs)
     .get('/crm/awarecrms/:user', CRMController.getAwareCRMs)
     .get('/crm/getcrm/:id', CRMController.getCRM)
+    .post('/crm/editcrm/:id', CRMController.editCRM)
 
 export default router;

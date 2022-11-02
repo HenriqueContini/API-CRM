@@ -59,4 +59,14 @@ export default class CRMController {
 
         return res.status(200).send(crm);
     }
+
+    static async editCRM(req, res) {
+        const crm = await CRMService.editCRM(req.params.id);
+
+        if (crm.error === true) {
+            return res.status(500).json(crm)
+        }
+
+        return res.status(201).json(crm);
+    }
 }

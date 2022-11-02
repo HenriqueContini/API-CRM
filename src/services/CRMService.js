@@ -133,4 +133,64 @@ export default class CRMService {
             return { error: true, msg: 'Houve um problema ao buscar pela CRM' }
         }
     }
+
+    static async editCRM(id, data) {
+        try {
+            const crm = await CRM.findByPk(id);
+
+            await CRM.update({
+                status_crm: 'Rejeitado'
+            }, {
+                where: {
+                    id: crm.id
+                }
+            });
+
+            await CRM.create({
+                numero_crm: crm.numero_crm,
+                versao: crm.versao + 1,
+                requerente: crm.requerente,
+                setor: crm.setor,
+                nome_crm: data.nome_crm,
+                necessidade: data.necessidade,
+                impacto: data.impacto,
+                descricao: data.descricao,
+                objetivo: data.objetivo,
+                justificativa: data.justificativa,
+                alternativa: data.alternativa,
+                sistemas_envolvidos: data.sistemas,
+                comportamento_offline: data.offline,
+                dependencia: data.dependencia
+            })
+
+            const CRMCreated = await CRM.max('id', {
+                where: {
+                    requerente: crm.requerente
+                }
+            })
+
+            await Approval.create({
+                crm_id: CRMCreated,
+                setor: 1,
+                decisao: 'Pendente'
+            })
+
+            if (data.setores !== undefined) {
+                let crm_departments = JSON.parse(data.setores);
+
+                crm_departments.forEach(async (department) => {
+                    await Approval.create({
+                        crm_id: CRMCreated,
+                        setor: department,
+                        decisao: 'Pendente'
+                    })
+                })
+            }
+
+            return { error: false, msg: "Criado com sucesso!" };
+        } catch (e) {
+            console.log(e);
+            return { error: true, msg: "Falha ao tentar criar uma nova versão da CRM!" };
+        }
+    }
 }
