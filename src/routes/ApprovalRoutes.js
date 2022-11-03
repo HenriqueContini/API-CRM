@@ -5,5 +5,6 @@ const router = express.Router();
 
 router
     .put('/approval/putdecision/:crm', ApprovalController.putDecision)
+    .put('/approval/putitdecision/:crm', ApprovalController.putITDecision)
 
 export default router;
