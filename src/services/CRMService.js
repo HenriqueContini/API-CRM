@@ -84,7 +84,7 @@ export default class CRMService {
                 inner join aprovacoes ap on cr.id = ap.crm_id
                 inner join usuarios u on cr.requerente = u.matricula
                 WHERE (cr.numero_crm, cr.versao) IN (SELECT numero_crm, MAX(versao) FROM crms GROUP BY numero_crm) 
-                and ap.setor = :user_department and cr.requerente != :user;`, {
+                and ap.decisao = 'Pendente' and ap.setor = :user_department and cr.requerente != :user;`, {
                 model: CRM,
                 replacements: {
                     user: user.matricula,
@@ -118,8 +118,9 @@ export default class CRMService {
                 return { error: true, msg: 'CRM não encontrada!' };
             }
 
-            const crmDepartments = await db.query(`select a.id_aprovacao, a.decisao, a.comentario, a.crm_id, a.responsavel, s.cod_setor, s.nome as setor from aprovacoes a
-                inner join setores s on a.setor = s.cod_setor where a.crm_id = :id;`, {
+            const crmDepartments = await db.query(`select ap.id_aprovacao, ap.decisao, ap.comentario, ap.crm_id, ap.setor, u.nome as responsavel from aprovacoes ap 
+                left join usuarios u on ap.responsavel = u.matricula
+                inner join setores s on ap.setor = s.cod_setor where ap.crm_id = :id;`, {
                 model: Approval,
                 replacements: {
                     id: id
@@ -127,7 +128,32 @@ export default class CRMService {
                 type: QueryTypes.SELECT
             })
 
-            return { crm: crm[0], setores: crmDepartments };
+            const checkApproval = await db.query(`select distinct(decisao) from aprovacoes where setor != 1 and crm_id = :id;`, {
+                model: Approval,
+                replacements: {
+                    id: id
+                },
+                type: QueryTypes.SELECT
+            })
+
+            let allowIT = () => {
+                if (crm[0].status_crm === 'Pendente') {
+                    if (checkApproval.length === 0) {
+                        return true;
+                    } else if (checkApproval.length === 1) {
+                        if (checkApproval[0].decisao === 'Aprovado') {
+                            return true;
+                        }
+                        return false;
+                    }
+                    return false
+                }
+                return false;
+            };
+
+            // crm.status_crm = 'Pendente' && checkApproval.length === 1 && checkApproval[0].decisao === 'Aprovado' ? true : false;
+
+            return { crm: crm[0], setores: crmDepartments, allowIT: allowIT() };
         } catch (e) {
             console.log(e);
             return { error: true, msg: 'Houve um problema ao buscar pela CRM' }

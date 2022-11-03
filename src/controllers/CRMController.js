@@ -61,7 +61,7 @@ export default class CRMController {
     }
 
     static async editCRM(req, res) {
-        const crm = await CRMService.editCRM(req.params.id);
+        const crm = await CRMService.editCRM(req.params.id, req.body);
 
         if (crm.error === true) {
             return res.status(500).json(crm)
