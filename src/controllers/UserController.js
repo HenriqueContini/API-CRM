@@ -15,7 +15,7 @@ export default class UserController {
         const loginResult = await UserService.login(matricula, senha);
 
         if (loginResult.error === true) {
-            return res.status(400).json(loginResult);
+            return res.status(500).json(loginResult);
         }
 
         return res.status(200).json(loginResult);
@@ -25,9 +25,25 @@ export default class UserController {
         const user = await UserService.getUser(req.params.user);
 
         if (user.error === true) {
+            return res.status(500).json(user);
+        }
+        
+        return res.status(200).json(user)
+    }
+    
+    static async updateUser(req, res) {
+        const user = await UserService.getUser(req.params.user);
+        
+        if (user.error === true) {
             return res.status(400).json(user);
         }
+        
+        const update = await UserService.updateUser(user.matricula, req.body, req.file);
+        
+        if (update.error === true) {
+            return res.status(500).json(update);
+        }
 
-        return res.status(200).json(user)
+        return res.status(200).json(update);
     }
 }

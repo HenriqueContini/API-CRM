@@ -16,6 +16,9 @@ const User = db.define('User', {
     },
     senha: {
         type: Sequelize.STRING(100)
+    },
+    imagem_usuario: {
+        type: Sequelize.STRING(200)
     }
 }, {
     tableName: 'usuarios',

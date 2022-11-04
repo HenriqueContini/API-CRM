@@ -65,8 +65,6 @@ export default class ApprovalService {
 
             const ITApproval = await Approval.findByPk(idApproval);
 
-            console.log(ITApproval)
-
             await CRM.update({
                 status_crm: ITApproval.decisao,
                 complexidade: data.complexidade,

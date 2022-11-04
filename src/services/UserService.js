@@ -40,7 +40,7 @@ export default class UserService {
 
     static async getUser(enrollment) {
         try {
-            const user = await db.query(`select u.matricula, u.nome, u.email, s.nome as setor from usuarios u 
+            const user = await db.query(`select u.matricula, u.nome, u.email, s.nome as setor, u.imagem_usuario from usuarios u 
                 inner join setores s on u.setor = s.cod_setor where u.matricula = :user`, {
                 model: User,
                 replacements: {
@@ -50,13 +50,49 @@ export default class UserService {
             });
 
             if (user === null) {
-                return {error: true, msg: 'Usuário não encontrado'};
+                return { error: true, msg: 'Usuário não encontrado' };
             }
 
             return user[0];
         } catch (e) {
             console.log(e);
-            return {error: true, msg: 'Falha ao tentar encontrar dados do usuário'};
+            return { error: true, msg: 'Falha ao tentar encontrar dados do usuário' };
+        }
+    }
+
+    static async updateUser(enrollment, data, image) {
+        const email = data.email;
+        const password = data.senha;
+
+        try {
+            if (email) {
+                await User.update({ email: email }, {
+                    where: {
+                        matricula: enrollment
+                    }
+                });
+            }
+
+            if (password) {
+                await User.update({ senha: password }, {
+                    where: {
+                        matricula: enrollment
+                    }
+                })
+            }
+
+            if (image) {
+                await User.update({ imagem_usuario: image.firebaseURL }, {
+                    where: {
+                        matricula: enrollment
+                    }
+                })
+            }
+
+            return { error: false, msg: "Atualizado com sucesso" };
+        } catch (e) {
+            console.log(e);
+            return { error: true, msg: "Erro ao tentar atualizar o usuário!" };
         }
     }
 }
