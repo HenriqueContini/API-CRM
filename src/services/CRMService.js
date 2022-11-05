@@ -2,9 +2,10 @@ import { QueryTypes } from 'sequelize';
 import db from '../config/dbconfig.js';
 import CRM from '../models/CRM.js';
 import Approval from '../models/Approval.js';
+import CRMFile from '../models/CRMFile.js';
 
 export default class CRMService {
-    static async createCRM(user, data) {
+    static async createCRM(user, data, files) {
         try {
             let lastCRM = await CRM.max('numero_crm');
 
@@ -32,6 +33,15 @@ export default class CRMService {
                 where: {
                     requerente: user.matricula
                 }
+            })
+
+            files.forEach(async (file) => {
+                await CRMFile.create({
+                    crm_id: CRMCreated,
+                    nome: file.originalname,
+                    mimetype: file.mimetype,
+                    fileURL: file.firebaseURL
+                })
             })
 
             await Approval.create({
@@ -151,9 +161,15 @@ export default class CRMService {
                 return false;
             };
 
+            const files = await CRMFile.findAll({
+                where: {
+                    crm_id: id
+                }
+            })
+
             // crm.status_crm = 'Pendente' && checkApproval.length === 1 && checkApproval[0].decisao === 'Aprovado' ? true : false;
 
-            return { crm: crm[0], setores: crmDepartments, allowIT: allowIT() };
+            return { crm: crm[0], setores: crmDepartments, arquivos: files, allowIT: allowIT() };
         } catch (e) {
             console.log(e);
             return { error: true, msg: 'Houve um problema ao buscar pela CRM' }

@@ -11,6 +11,6 @@ const upload = multer({
 router
     .post('/user/login', UserController.login)
     .get('/user/getuser/:user', UserController.getUser)
-    .put('/user/updateuser/:user', upload.single('image'), FileService.updateUserImage, UserController.updateUser)
+    .put('/user/updateuser/:user', upload.single('file'), FileService.updateUserImage, UserController.updateUser)
 
 export default router;

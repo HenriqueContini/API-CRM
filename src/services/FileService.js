@@ -4,7 +4,7 @@ const bucket = admin.storage().bucket();
 
 export default class FileService {
     static updateUserImage(req, res, next) {
-        if(!req.file) {
+        if (!req.file) {
             return next();
         }
 
@@ -31,5 +31,42 @@ export default class FileService {
         })
 
         stream.end(image.buffer);
+    }
+
+    static async addFilesCRM(req, res, next) {
+        if (!req.files) {
+            return next();
+        }
+
+        let filesList = req.files;
+        let i = 0;
+
+        filesList.forEach((file, index) => {
+            const fileName = `${Date.now()}.${file.originalname.split('.').pop()}`;
+
+            const bucketFile = bucket.file(`crmfiles/${fileName}`);
+            const stream = bucketFile.createWriteStream({
+                metadata: {
+                    contentType: file.mimetype
+                }
+            })
+
+            stream.on("error", (e) => {
+                console.log(e);
+            })
+
+            stream.on("finish", async () => {
+                await bucketFile.makePublic();
+
+                req.files[index].firebaseURL = `https://storage.googleapis.com/${BUCKET}/crmfiles/${fileName}`;
+
+                i++;
+
+                if (i === filesList.length) {
+                    next();
+                }
+            })
+            stream.end(file.buffer);
+        })
     }
 }

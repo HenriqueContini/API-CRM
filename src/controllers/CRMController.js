@@ -9,7 +9,7 @@ export default class CRMController {
             return res.status(404).json(user);
         }
 
-        const newCRM = await CRMService.createCRM(user, req.body);
+        const newCRM = await CRMService.createCRM(user, req.body, req.files);
 
         if (newCRM.error === true) {
             return res.status(500).json(newCRM);
