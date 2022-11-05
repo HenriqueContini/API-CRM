@@ -35,14 +35,16 @@ export default class CRMService {
                 }
             })
 
-            files.forEach(async (file) => {
-                await CRMFile.create({
-                    crm_id: CRMCreated,
-                    nome: file.originalname,
-                    mimetype: file.mimetype,
-                    fileURL: file.firebaseURL
+            if(files) {
+                files.forEach(async (file) => {
+                    await CRMFile.create({
+                        crm_id: CRMCreated,
+                        nome: file.originalname,
+                        mimetype: file.mimetype,
+                        fileURL: file.firebaseURL
+                    })
                 })
-            })
+            }
 
             await Approval.create({
                 crm_id: CRMCreated,
@@ -72,7 +74,7 @@ export default class CRMService {
     static async getUserCRMs(user) {
         try {
             const crms = await db.query(`SELECT cr.id, cr.numero_crm, cr.versao, u.nome as requerente, cr.nome_crm, 
-                cr.descricao, DATE_FORMAT(cr.data_criacao, "%m %d %Y") as data_criacao FROM crms cr 
+                cr.descricao, cr.data_criacao as data_criacao FROM crms cr 
                 INNER JOIN usuarios u on u.matricula = cr.requerente WHERE (numero_crm, versao) IN 
                 (SELECT numero_crm, MAX(versao) FROM crms WHERE requerente = :user GROUP BY numero_crm);`, {
                 model: CRM,
@@ -176,7 +178,7 @@ export default class CRMService {
         }
     }
 
-    static async editCRM(id, data) {
+    static async editCRM(id, data, files) {
         try {
             const crm = await CRM.findByPk(id);
 
@@ -188,9 +190,15 @@ export default class CRMService {
                 }
             });
 
+            const newVersion = await CRM.max('versao', {
+                where: {
+                    numero_crm: crm.numero_crm
+                }
+            })
+
             await CRM.create({
                 numero_crm: crm.numero_crm,
-                versao: crm.versao + 1,
+                versao: newVersion + 1,
                 requerente: crm.requerente,
                 setor: crm.setor,
                 nome_crm: data.nome_crm,
@@ -211,6 +219,17 @@ export default class CRMService {
                 }
             })
 
+            if (files) {
+                files.forEach(async (file) => {
+                    await CRMFile.create({
+                        crm_id: CRMCreated,
+                        nome: file.originalname,
+                        mimetype: file.mimetype,
+                        fileURL: file.firebaseURL
+                    })
+                })
+            }
+
             await Approval.create({
                 crm_id: CRMCreated,
                 setor: 1,
@@ -228,6 +247,8 @@ export default class CRMService {
                     })
                 })
             }
+
+            console.log('Chegou')
 
             return { error: false, msg: "Criado com sucesso!" };
         } catch (e) {

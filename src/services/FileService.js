@@ -34,7 +34,7 @@ export default class FileService {
     }
 
     static async addFilesCRM(req, res, next) {
-        if (!req.files) {
+        if (req.files.length === 0) {
             return next();
         }
 

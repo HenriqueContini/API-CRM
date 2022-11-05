@@ -13,6 +13,6 @@ router
     .get('/crm/usercrms/:user', CRMController.getUserCRMs)
     .get('/crm/awarecrms/:user', CRMController.getAwareCRMs)
     .get('/crm/getcrm/:id', CRMController.getCRM)
-    .post('/crm/editcrm/:id', CRMController.editCRM)
+    .post('/crm/editcrm/:id', upload.array('files'), FileService.addFilesCRM, CRMController.editCRM)
 
 export default router;
