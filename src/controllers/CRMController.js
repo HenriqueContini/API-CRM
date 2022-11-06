@@ -50,6 +50,12 @@ export default class CRMController {
         return res.status(200).send(crms);
     }
 
+    static async searchCRMs(req, res) {
+        const crms = await CRMService.searchCRMs(req.query);
+
+        return res.status(200).send(crms);
+    }
+
     static async getCRM(req, res) {
         const crm = await CRMService.getCRM(req.params.id);
 

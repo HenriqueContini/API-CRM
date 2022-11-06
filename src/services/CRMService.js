@@ -1,8 +1,9 @@
-import { QueryTypes } from 'sequelize';
+import { QueryTypes, Op } from 'sequelize';
 import db from '../config/dbconfig.js';
 import CRM from '../models/CRM.js';
 import Approval from '../models/Approval.js';
 import CRMFile from '../models/CRMFile.js';
+import User from '../models/User.js';
 
 export default class CRMService {
     static async createCRM(user, data, files) {
@@ -35,7 +36,7 @@ export default class CRMService {
                 }
             })
 
-            if(files) {
+            if (files) {
                 files.forEach(async (file) => {
                     await CRMFile.create({
                         crm_id: CRMCreated,
@@ -112,6 +113,59 @@ export default class CRMService {
         }
     }
 
+    static async searchCRMs(query) {
+        try {
+            let params = [];
+    
+            if (query.requerente) {
+                let user = await User.findOne({
+                    where: {
+                        nome: {
+                            [Op.like]: `%${query.requerente}%`
+                        }
+                    }
+                })
+
+                console.log(user)
+    
+                if (user) {
+                    console.log(user)
+                    params.push(`requerente = '${user.matricula}'`);
+                }
+            }
+    
+            if (query.numero_crm) {
+                params.push(`numero_crm in (${Number(query.numero_crm)})`);
+            }
+    
+            if (query.nome_crm) {
+                params.push(`nome_crm like '%${query.nome_crm}%'`);
+            }
+    
+            if (query.data_criacao) {
+                const date = new Date(query.data_criacao);
+
+                params.push(`DATE(data_criacao) = '${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}'`);
+            }
+
+            if (params.length > 0) {
+                const crms = db.query(`SELECT cr.id, cr.numero_crm, cr.versao, u.nome as requerente, cr.nome_crm, 
+                    cr.descricao, cr.data_criacao as data_criacao FROM crms cr 
+                    INNER JOIN usuarios u on u.matricula = cr.requerente WHERE ${params.join(' AND ')}`, {
+                    model: CRM,
+                    type: QueryTypes.SELECT
+                })
+
+                return crms;
+            }
+    
+            return {error: true, msg: "Nenhuma CRM encontrada"}
+        } catch (e) {
+            console.log(e)
+            return {error: true, msg: 'Ocorreu um erro ao buscar pelas CRMs'};
+        }
+    }
+
     static async getCRM(id) {
         try {
             const crm = await db.query(`select cr.id, cr.numero_crm, cr.versao, u.nome as requerente, cr.requerente as requerente_matricula, u.email as email, s.nome as setor, 
@@ -129,6 +183,14 @@ export default class CRMService {
             if (crm === null) {
                 return { error: true, msg: 'CRM não encontrada!' };
             }
+
+            const versions = await db.query('select id, versao from crms where numero_crm = :crm;', {
+                model: CRM,
+                replacements: {
+                    crm: crm[0].numero_crm
+                },
+                type: QueryTypes.SELECT
+            })
 
             const crmDepartments = await db.query(`select ap.id_aprovacao, ap.decisao, ap.comentario, ap.crm_id, s.nome as setor, s.cod_setor, u.nome as responsavel from aprovacoes ap 
                 left join usuarios u on ap.responsavel = u.matricula
@@ -171,7 +233,7 @@ export default class CRMService {
 
             // crm.status_crm = 'Pendente' && checkApproval.length === 1 && checkApproval[0].decisao === 'Aprovado' ? true : false;
 
-            return { crm: crm[0], setores: crmDepartments, arquivos: files, allowIT: allowIT() };
+            return { crm: crm[0], versoes: versions, setores: crmDepartments, arquivos: files, allowIT: allowIT() };
         } catch (e) {
             console.log(e);
             return { error: true, msg: 'Houve um problema ao buscar pela CRM' }
