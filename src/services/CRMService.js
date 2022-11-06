@@ -125,8 +125,6 @@ export default class CRMService {
                         }
                     }
                 })
-
-                console.log(user)
     
                 if (user) {
                     console.log(user)
@@ -143,9 +141,9 @@ export default class CRMService {
             }
     
             if (query.data_criacao) {
-                const date = new Date(query.data_criacao);
+                let date = new Date(query.data_criacao);
 
-                params.push(`DATE(data_criacao) = '${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}'`);
+                params.push(`DATE(data_criacao) = '${date.toISOString().split('T')[0]}'`);
             }
 
             if (params.length > 0) {
