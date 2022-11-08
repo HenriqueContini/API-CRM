@@ -74,7 +74,7 @@ export default class CRMService {
 
     static async getUserCRMs(user) {
         try {
-            const crms = await db.query(`SELECT cr.id, cr.numero_crm, cr.versao, u.nome as requerente, cr.nome_crm, 
+            const crms = await db.query(`SELECT cr.id, cr.numero_crm, cr.versao, cr.status_crm, u.nome as requerente, cr.nome_crm, 
                 cr.descricao, cr.data_criacao as data_criacao FROM crms cr 
                 INNER JOIN usuarios u on u.matricula = cr.requerente WHERE (numero_crm, versao) IN 
                 (SELECT numero_crm, MAX(versao) FROM crms WHERE requerente = :user GROUP BY numero_crm);`, {
@@ -92,7 +92,7 @@ export default class CRMService {
 
     static async getAwareCRMs(user) {
         try {
-            const crms = await db.query(`select cr.id, cr.numero_crm, cr.versao, u.nome as requerente, cr.nome_crm, 
+            const crms = await db.query(`select cr.id, cr.numero_crm, cr.versao, cr.status_crm, u.nome as requerente, cr.nome_crm, 
                 cr.descricao, DATE_FORMAT(cr.data_criacao, "%m %d %Y") as data_criacao from crms cr
                 inner join aprovacoes ap on cr.id = ap.crm_id
                 inner join usuarios u on cr.requerente = u.matricula
@@ -147,7 +147,7 @@ export default class CRMService {
             }
 
             if (params.length > 0) {
-                const crms = db.query(`SELECT cr.id, cr.numero_crm, cr.versao, u.nome as requerente, cr.nome_crm, 
+                const crms = db.query(`SELECT cr.id, cr.numero_crm, cr.versao, cr.status_crm, u.nome as requerente, cr.nome_crm, 
                     cr.descricao, cr.data_criacao as data_criacao FROM crms cr 
                     INNER JOIN usuarios u on u.matricula = cr.requerente WHERE ${params.join(' AND ')}`, {
                     model: CRM,
@@ -166,7 +166,7 @@ export default class CRMService {
 
     static async getCRM(id) {
         try {
-            const crm = await db.query(`select cr.id, cr.numero_crm, cr.versao, u.nome as requerente, cr.requerente as requerente_matricula, u.email as email, s.nome as setor, 
+            const crm = await db.query(`select cr.id, cr.status_crm, cr.numero_crm, cr.versao, u.nome as requerente, cr.requerente as requerente_matricula, u.email as email, s.nome as setor, 
                 cr.nome_crm, DATE_FORMAT(cr.data_criacao, "%m %d %Y") as data_criacao, cr.status_crm, cr.necessidade, cr.impacto, 
                 cr.descricao, cr.objetivo, cr.justificativa, cr.alternativa, cr.sistemas_envolvidos, cr.comportamento_offline, 
                 cr.dependencia, cr.complexidade, cr.impacto_mudanca from crms cr 
