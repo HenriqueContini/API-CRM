@@ -1,3 +1,5 @@
+import { QueryTypes } from "sequelize";
+import db from "../config/dbconfig.js";
 import Approval from "../models/Approval.js";
 import CRM from "../models/CRM.js";
 
@@ -28,13 +30,46 @@ export default class ApprovalService {
                 }
             })
 
-            return {error: false, msg: "Aprovado / Rejeitado com sucesso"};
+            console.log(data.aprovado)
+
+            if (data.aprovado === false) {
+                await CRM.update({
+                    status_crm: 'Rejeitado',
+                }, {
+                    where: {
+                        id: crm
+                    }
+                })
+
+                console.log('Rejeitado')
+
+                return {error: false, msg: "Rejeitado com sucesso"};
+            }
+
+            console.log('passou')
+            console.log(crm)
+            
+            const checkApprovals = await db.query(`select distinct(decisao) from aprovacoes where crm_id = :id;`, {
+                model: Approval,
+                replacements: {
+                    id: crm
+                },
+                type: QueryTypes.SELECT
+            })
+            
+            if (checkApprovals.length === 1 && checkApprovals[0].decisao === "Aprovado") {
+                await Approval.create({
+                    crm_id: crm,
+                    setor: 1,
+                    decisao: 'Pendente'
+                })
+            }
+            
+            return {error: false, msg: "Aprovado com sucesso"};
         } catch (e) {
             console.log(e);
             return {error: true, msg: "Ocorreu um erro ao aprovar / rejeitar a CRM"};
         }
-        
-        //update aprovacoes set decisao = 'Aprovado', comentario = "Tudo em ordem", responsavel = "00003" where id_aprovacao = 12;
     }
 
     static async putITDecision(user, crm, data) {
@@ -80,7 +115,5 @@ export default class ApprovalService {
             console.log(e);
             return {error: true, msg: "Ocorreu um erro ao aprovar / rejeitar a CRM pelo TI"};
         }
-        
-        //update aprovacoes set decisao = 'Aprovado', comentario = "Tudo em ordem", responsavel = "00003" where id_aprovacao = 12;
     }
 }

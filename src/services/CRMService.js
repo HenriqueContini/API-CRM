@@ -47,21 +47,24 @@ export default class CRMService {
                 })
             }
 
-            await Approval.create({
-                crm_id: CRMCreated,
-                setor: 1,
-                decisao: 'Pendente'
-            })
-
+            
             if (data.setores !== undefined) {
                 let crm_departments = JSON.parse(data.setores);
-
+                
                 crm_departments.forEach(async (department) => {
                     await Approval.create({
                         crm_id: CRMCreated,
                         setor: department,
                         decisao: 'Pendente'
                     })
+                })
+            }
+
+            if (JSON.parse(data.setores).length === 0) {
+                await Approval.create({
+                    crm_id: CRMCreated,
+                    setor: 1,
+                    decisao: 'Pendente'
                 })
             }
 
@@ -116,7 +119,7 @@ export default class CRMService {
     static async searchCRMs(query) {
         try {
             let params = [];
-    
+
             if (query.requerente) {
                 let user = await User.findOne({
                     where: {
@@ -125,21 +128,21 @@ export default class CRMService {
                         }
                     }
                 })
-    
+
                 if (user) {
                     console.log(user)
                     params.push(`requerente = '${user.matricula}'`);
                 }
             }
-    
+
             if (query.numero_crm) {
                 params.push(`numero_crm in (${Number(query.numero_crm)})`);
             }
-    
+
             if (query.nome_crm) {
                 params.push(`nome_crm like '%${query.nome_crm}%'`);
             }
-    
+
             if (query.data_criacao) {
                 let date = new Date(query.data_criacao);
 
@@ -156,11 +159,11 @@ export default class CRMService {
 
                 return crms;
             }
-    
-            return {error: true, msg: "Nenhuma CRM encontrada"}
+
+            return { error: true, msg: "Nenhuma CRM encontrada" }
         } catch (e) {
             console.log(e)
-            return {error: true, msg: 'Ocorreu um erro ao buscar pelas CRMs'};
+            return { error: true, msg: 'Ocorreu um erro ao buscar pelas CRMs' };
         }
     }
 
@@ -229,8 +232,6 @@ export default class CRMService {
                 }
             })
 
-            // crm.status_crm = 'Pendente' && checkApproval.length === 1 && checkApproval[0].decisao === 'Aprovado' ? true : false;
-
             return { crm: crm[0], versoes: versions, setores: crmDepartments, arquivos: files, allowIT: allowIT() };
         } catch (e) {
             console.log(e);
@@ -290,12 +291,6 @@ export default class CRMService {
                 })
             }
 
-            await Approval.create({
-                crm_id: CRMCreated,
-                setor: 1,
-                decisao: 'Pendente'
-            })
-
             if (data.setores !== undefined) {
                 let crm_departments = JSON.parse(data.setores);
 
@@ -305,6 +300,14 @@ export default class CRMService {
                         setor: department,
                         decisao: 'Pendente'
                     })
+                })
+            }
+
+            if (JSON.parse(data.setores).length === 0) {
+                await Approval.create({
+                    crm_id: CRMCreated,
+                    setor: 1,
+                    decisao: 'Pendente'
                 })
             }
 
