@@ -46,4 +46,20 @@ export default class UserController {
 
         return res.status(200).json(update);
     }
+
+    static async createUser(req, res) {
+        const user = await UserService.getUser(req.params.user);
+
+        if (user.setor !== 'TI') {
+            res.status(401).json({error: true, msg: "Usuário não autorizado"});
+        }
+
+        const createUser = await UserService.createUser(req.body);
+
+        if (createUser.error === true) {
+            return res.status(500).json(createUser);
+        }
+
+        return res.status(201).json(createUser);
+    }
 }

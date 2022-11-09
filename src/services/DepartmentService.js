@@ -17,4 +17,14 @@ export default class DepartmentService {
             return { error: true, msg: 'Erro ao buscar os setores!' };
         }
     }
+
+    static async listAllDepartments() {
+        try {
+            const departments = await Department.findAll()
+
+            return departments;
+        } catch (e) {
+            return { error: true, msg: 'Erro ao buscar os setores!' };
+        }
+    }
 }

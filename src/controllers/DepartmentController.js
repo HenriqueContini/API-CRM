@@ -16,4 +16,14 @@ export default class DepartmentController {
 
         return res.status(200).json(departments);
     }
+
+    static async getAllDepartments(req, res) {
+        const departments = await DepartmentService.listAllDepartments()
+
+        if (departments.error === true) {
+            return res.status(500).json(departments);
+        }
+
+        return res.status(200).json(departments);
+    }
 }

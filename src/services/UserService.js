@@ -95,4 +95,31 @@ export default class UserService {
             return { error: true, msg: "Erro ao tentar atualizar o usuário!" };
         }
     }
+
+    static async createUser(data) {
+        try {
+            const user = await User.findAll({
+                where: {
+                    matricula: data.matricula
+                }
+            })
+
+            if (user.length >= 1) {
+                return {error: true, msg: "Já existe um usuário com esta matrícula"};
+            }
+
+            await User.create({
+                matricula: data.matricula,
+                nome: data.nome,
+                email: data.email,
+                senha: data.senha,
+                setor: data.setor_usuario
+            })
+
+            return {error: false, msg: 'Criado com sucesso!'}
+        } catch (e) {
+            console.log(e)
+            return {error: true, msg: "Falha ao criar usuário!"}
+        }
+    }
 }
