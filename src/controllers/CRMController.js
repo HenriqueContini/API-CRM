@@ -15,7 +15,7 @@ export default class CRMController {
             return res.status(500).json(newCRM);
         }
 
-        return res.status(201).json({ error: false, msg: "Criado com sucesso!" });
+        return res.status(201).json(newCRM);
     }
 
     static async getUserCRMs(req, res) {

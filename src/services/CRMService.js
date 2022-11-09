@@ -46,7 +46,6 @@ export default class CRMService {
                     })
                 })
             }
-
             
             if (data.setores !== undefined) {
                 let crm_departments = JSON.parse(data.setores);
@@ -68,7 +67,7 @@ export default class CRMService {
                 })
             }
 
-            return { error: false, msg: "Criado com sucesso!" };
+            return { error: false, idCRM: CRMCreated };;
         } catch (e) {
             console.log(e)
             return { error: true, msg: "Erro ao criar uma CRM!" };
@@ -311,9 +310,7 @@ export default class CRMService {
                 })
             }
 
-            console.log('Chegou')
-
-            return { error: false, msg: "Criado com sucesso!" };
+            return { error: false, idCRM: CRMCreated };
         } catch (e) {
             console.log(e);
             return { error: true, msg: "Falha ao tentar criar uma nova versão da CRM!" };
